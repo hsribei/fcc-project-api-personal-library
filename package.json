@@ -6,18 +6,20 @@
     "FreeCodeCamp Information Security and Quality Assurance Certification Project #3",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "develop": "NODE_ENV=dev nodemon --inspect server.js",
+    "test": "NODE_ENV=test nodemon --inspect server.js"
   },
   "dependencies": {
-    "express": "^4.14.0",
-    "cors": "^2.8.1",
     "body-parser": "^1.15.2",
-    "chai": "^3.5.0",
-    "mongodb": "^2.2.16",
-    "chai-http": "^3.0.0",
-    "mocha": "^3.2.0",
-    "zombie": "^5.0.5",
-    "helmet": "^3.1.0"
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "cors": "^2.8.1",
+    "express": "^4.14.0",
+    "helmet": "^3.1.0",
+    "mocha": "^5.0.5",
+    "mongodb": "^3.0.5",
+    "zombie": "^5.0.5"
   },
   "engines": {
     "node": "4.4.3"
@@ -27,5 +29,8 @@
     "url": "https://github.com/hsribei/fcc-project-api-personal-library"
   },
   "keywords": ["node", "hyperdev", "express"],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^1.17.2"
+  }
 }
