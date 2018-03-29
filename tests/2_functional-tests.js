@@ -6,10 +6,11 @@
 *
 */
 
-var chaiHttp = require("chai-http");
-var chai = require("chai");
-var assert = chai.assert;
-var server = require("../server");
+const chaiHttp = require("chai-http");
+const chai = require("chai");
+const assert = chai.assert;
+const server = require("../server");
+const ObjectId = require("mongodb").ObjectID;
 
 chai.use(chaiHttp);
 
@@ -25,21 +26,23 @@ suite("Functional Tests", function() {
       .end(function(err, res) {
         assert.equal(res.status, 200);
         assert.isArray(res.body, "response should be an array");
-        assert.property(
-          res.body[0],
-          "commentcount",
-          "Books in array should contain commentcount"
-        );
-        assert.property(
-          res.body[0],
-          "title",
-          "Books in array should contain title"
-        );
-        assert.property(
-          res.body[0],
-          "_id",
-          "Books in array should contain _id"
-        );
+        if (res.body.length > 0) {
+          assert.property(
+            res.body[0],
+            "commentcount",
+            "Books in array should contain commentcount"
+          );
+          assert.property(
+            res.body[0],
+            "title",
+            "Books in array should contain title"
+          );
+          assert.property(
+            res.body[0],
+            "_id",
+            "Books in array should contain _id"
+          );
+        }
         done();
       });
   });
@@ -52,28 +55,119 @@ suite("Functional Tests", function() {
       "POST /api/books with title => create book object/expect book object",
       function() {
         test("Test POST /api/books with title", function(done) {
-          //done();
+          chai
+            .request(server)
+            .post("/api/books")
+            .send({ title: "test title" })
+            .end(function(err, res) {
+              assert.strictEqual(res.status, 200);
+              assert.isObject(res.body);
+              assert.property(res.body, "title");
+              assert.strictEqual(res.body.title, "test title");
+              assert.property(res.body, "_id");
+
+              done();
+            });
         });
 
         test("Test POST /api/books with no title given", function(done) {
-          //done();
+          chai
+            .request(server)
+            .post("/api/books")
+            .send({})
+            .end(function(err, res) {
+              assert.isAtLeast(res.status, 400);
+              assert.isBelow(res.status, 500);
+
+              done();
+            });
         });
       }
     );
 
     suite("GET /api/books => array of books", function() {
       test("Test GET /api/books", function(done) {
-        //done();
+        chai
+          .request(server)
+          .post("/api/books")
+          .send({ title: "test title" })
+          .end(function(err, res) {
+            assert.strictEqual(res.status, 200);
+
+            const postedBook = res.body;
+
+            chai
+              .request(server)
+              .get("/api/books")
+              .end(function(err, res) {
+                assert.strictEqual(res.status, 200);
+                assert.isArray(res.body);
+
+                const books = res.body;
+
+                books.forEach(book => {
+                  assert.property(book, "_id");
+                  assert.property(book, "title");
+                  assert.isNotEmpty(book._id);
+                  assert.isNotEmpty(book.title);
+                });
+
+                assert(
+                  books.some(book => book._id === postedBook._id),
+                  "POSTed book should be present in GET"
+                );
+
+                done();
+              });
+          });
       });
     });
 
     suite("GET /api/books/[id] => book object with [id]", function() {
       test("Test GET /api/books/[id] with id not in db", function(done) {
-        //done();
+        const idNotinDb = new ObjectId();
+        chai
+          .request(server)
+          .get("/api/books/" + idNotinDb.toString())
+          .end(function(err, res) {
+            assert.isAtLeast(res.status, 400);
+            assert.isBelow(res.status, 500);
+            assert.strictEqual(res.error.text, "no book exists");
+
+            done();
+          });
       });
 
       test("Test GET /api/books/[id] with valid id in db", function(done) {
-        //done();
+        chai
+          .request(server)
+          .post("/api/books")
+          .send({ title: "test title" })
+          .end(function(err, res) {
+            assert.strictEqual(res.status, 200);
+
+            const postResponseBook = res.body;
+
+            chai
+              .request(server)
+              .get("/api/books/" + postResponseBook._id)
+              .end(function(err, res) {
+                assert.strictEqual(res.status, 200);
+                assert.isObject(res.body);
+
+                const getIdResponseBook = res.body;
+
+                assert.strictEqual(postResponseBook._id, getIdResponseBook._id);
+                assert.strictEqual(
+                  postResponseBook.title,
+                  getIdResponseBook.title
+                );
+                assert.isArray(getIdResponseBook.comments);
+                assert.isEmpty(getIdResponseBook.comments);
+
+                done();
+              });
+          });
       });
     });
 
@@ -81,7 +175,34 @@ suite("Functional Tests", function() {
       "POST /api/books/[id] => add comment/expect book object with id",
       function() {
         test("Test POST /api/books/[id] with comment", function(done) {
-          //done();
+          chai
+            .request(server)
+            .post("/api/books")
+            .send({ title: "test title" })
+            .end(function(err, res) {
+              assert.strictEqual(res.status, 200);
+
+              const savedBook = res.body;
+
+              chai
+                .request(server)
+                .post("/api/books/" + savedBook._id)
+                .send({ comment: "test comment" })
+                .end(function(err2, res2) {
+                  assert.strictEqual(res2.status, 200);
+                  assert.isObject(res2.body);
+
+                  const commentedBook = res2.body;
+
+                  assert.strictEqual(savedBook._id, commentedBook._id);
+                  assert.strictEqual(savedBook.title, commentedBook.title);
+                  assert.isArray(commentedBook.comments);
+                  assert.isNotEmpty(commentedBook.comments);
+                  assert.strictEqual(commentedBook.comments[0], "test comment");
+
+                  done();
+                });
+            });
         });
       }
     );
