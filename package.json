@@ -31,6 +31,7 @@
   "keywords": ["node", "hyperdev", "express"],
   "license": "MIT",
   "devDependencies": {
+    "morgan-body": "^2.4.0",
     "nodemon": "^1.17.2"
   }
 }

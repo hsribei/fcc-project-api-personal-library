@@ -10,12 +10,17 @@ const runner = require("./test-runner");
 
 const app = express();
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+if (process.env.NODE_ENV === "dev") {
+  const morganBody = require("morgan-body");
+  morganBody(app);
+}
+
 app.use("/public", express.static(process.cwd() + "/public"));
 
 app.use(cors({ origin: "*" })); //USED FOR FCC TESTING PURPOSES ONLY!
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 //Index page (static HTML)
 app.route("/").get(function(req, res) {
