@@ -73,8 +73,10 @@ suite("Functional Tests", function() {
                 books.forEach(book => {
                   assert.property(book, "_id");
                   assert.property(book, "title");
+                  assert.property(book, "commentcount");
                   assert.isNotEmpty(book._id);
                   assert.isNotEmpty(book.title);
+                  assert.isNumber(book.commentcount);
                 });
 
                 assert(
