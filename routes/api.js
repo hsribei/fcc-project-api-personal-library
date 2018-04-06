@@ -60,6 +60,13 @@ module.exports = function(app) {
 
     .delete(function(req, res) {
       //if successful response will be 'complete delete successful'
+      Book.remove({}, err => {
+        if (err) {
+          res.status(500).send(`${err.name}: ${err.message}`);
+        } else {
+          res.status(200).send("complete delete successful");
+        }
+      });
     });
 
   app
@@ -103,5 +110,12 @@ module.exports = function(app) {
     .delete(function(req, res) {
       const bookid = req.params.id;
       //if successful response will be 'delete successful'
+      Book.remove({ _id: new ObjectId(bookid) }, err => {
+        if (err) {
+          res.status(500).send(`${err.name}: ${err.message}`);
+        } else {
+          res.status(200).send("delete successful");
+        }
+      });
     });
 };

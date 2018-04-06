@@ -173,5 +173,66 @@ suite("Functional Tests", function() {
         });
       }
     );
+
+    suite("DELETE methods", function() {
+      test("Test DELETE /api/books/:id => delete book from collection", function(done) {
+        chai
+          .request(server)
+          .post("/api/books")
+          .send({ title: "test title" })
+          .end(function(err, res) {
+            assert.strictEqual(res.status, 200);
+
+            const savedBook = res.body;
+
+            chai
+              .request(server)
+              .delete(`/api/books/${savedBook._id}`)
+              .end(function(err, res) {
+                assert.strictEqual(res.status, 200);
+                assert.strictEqual(res.text, "delete successful");
+
+                chai
+                  .request(server)
+                  .get(`/api/books/${savedBook._id}`)
+                  .end(function(err, res) {
+                    assert.isAtLeast(res.status, 400);
+                    assert.isBelow(res.status, 500);
+                    assert.strictEqual(res.error.text, "no book exists");
+
+                    done();
+                  });
+              });
+          });
+      });
+
+      test("Test DELETE /api/books => delete all books", function(done) {
+        chai
+          .request(server)
+          .post("/api/books")
+          .send({ title: "test title" })
+          .end(function(err, res) {
+            assert.strictEqual(res.status, 200);
+
+            chai
+              .request(server)
+              .delete("/api/books")
+              .end(function(err, res) {
+                assert.strictEqual(res.status, 200);
+
+                chai
+                  .request(server)
+                  .get("/api/books")
+                  .end(function(err, res) {
+                    assert.strictEqual(res.status, 200);
+                    assert.isArray(res.body);
+                    assert.isEmpty(res.body);
+
+                    done();
+                  });
+              });
+          });
+      });
+    });
   });
 });
