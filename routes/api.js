@@ -33,7 +33,20 @@ module.exports = function(app) {
 
     .post(function(req, res) {
       const title = req.body.title;
-      //response will contain new book object including atleast _id and title
+      if (!title) {
+        res.status(400).send("No title given");
+      } else {
+        //response will contain new book object including atleast _id and title
+        new Book({ title }).save((err, book) => {
+          if (err) {
+            res.status(500).send(`${err.name}: ${err.message}`);
+          } else if (book) {
+            res.json(book);
+          } else {
+            res.sendStatus(500);
+          }
+        });
+      }
     })
 
     .delete(function(req, res) {
