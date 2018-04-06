@@ -9,11 +9,19 @@
 "use strict";
 
 require("dotenv").config();
-const expect = require("chai").expect;
-const MongoClient = require("mongodb").MongoClient;
+const mongoose = require("mongoose");
 const ObjectId = require("mongodb").ObjectId;
-const MONGODB_CONNECTION_STRING = process.env.MONGO_URI;
-//Example connection: MongoClient.connect(MONGODB_CONNECTION_STRING, function(err, db) {});
+
+const Schema = mongoose.Schema;
+
+const bookSchema = new Schema({
+  title: { type: String, required: true },
+  comments: [String]
+});
+
+const Book = mongoose.model("Book", bookSchema);
+
+mongoose.connect(process.env.MONGO_URI);
 
 module.exports = function(app) {
   app
