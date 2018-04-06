@@ -15,6 +15,7 @@ const ObjectId = require("mongodb").ObjectID;
 chai.use(chaiHttp);
 
 suite("Functional Tests", function() {
+  this.timeout(5000);
   suite("Routing tests", function() {
     suite(
       "POST /api/books with title => create book object/expect book object",
