@@ -82,6 +82,22 @@ module.exports = function(app) {
       const bookid = req.params.id;
       const comment = req.body.comment;
       //json res format same as .get
+      Book.findById(new ObjectId(bookid), (err, book) => {
+        if (err) {
+          res.status(500).send(`${err.name}: ${err.message}`);
+        } else if (!book) {
+          res.status(404).send("no book exists");
+        } else {
+          book.comments.push(comment);
+          book.save(err => {
+            if (err) {
+              res.status(500).send(`${err.name}: ${err.message}`);
+            } else {
+              res.json(book);
+            }
+          });
+        }
+      });
     })
 
     .delete(function(req, res) {
