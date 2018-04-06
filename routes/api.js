@@ -9,6 +9,7 @@
 "use strict";
 
 require("dotenv").config();
+const helmet = require("helmet");
 const mongoose = require("mongoose");
 const ObjectId = require("mongodb").ObjectId;
 
@@ -24,6 +25,9 @@ const Book = mongoose.model("Book", bookSchema);
 mongoose.connect(process.env.MONGO_URI);
 
 module.exports = function(app) {
+  app.use(helmet.noCache());
+  app.use(helmet.hidePoweredBy({ setTo: "PHP 4.2.0" }));
+
   app
     .route("/api/books")
     .get(function(req, res) {
